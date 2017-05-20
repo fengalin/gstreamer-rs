@@ -17,7 +17,6 @@ generate = [
     "Gst.Clock",
     "Gst.ClockTime",
     "Gst.Element",
-    "Gst.Bin",
     "Gst.Pipeline",
     "Gst.State",
     "Gst.StateChangeReturn",
@@ -39,3 +38,18 @@ manual = [
     "GLib.Error",
     #"Gst.Message",
 ]
+
+[[object]]
+name = "Gst.*"
+status = "generate"
+    [[object.function]]
+    name = "util_dump_mem"
+    ignore = true
+
+[[object]]
+name = "Gst.Bin"
+status = "generate"
+    [[object.function]]
+    name = "add"
+        [object.function.return]
+        bool_return_is_error = true
