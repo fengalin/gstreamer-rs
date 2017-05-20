@@ -12,18 +12,13 @@ external_libraries = [
 ]
 
 generate = [
-    "Gst.Object",
-    "Gst.Bus",
-    "Gst.Clock",
     "Gst.ClockTime",
-    "Gst.Element",
     "Gst.Pipeline",
     "Gst.State",
     "Gst.StateChangeReturn",
     "Gst.StateChange",
     "Gst.SeekFlags",
     "Gst.SeekType",
-    "Gst.Pad",
     "Gst.FlowReturn",
     "Gst.PadDirection",
     "Gst.PadTemplate",
@@ -40,16 +35,146 @@ manual = [
 ]
 
 [[object]]
-name = "Gst.*"
-status = "generate"
-    [[object.function]]
-    name = "util_dump_mem"
-    ignore = true
-
-[[object]]
 name = "Gst.Bin"
 status = "generate"
     [[object.function]]
     name = "add"
         [object.function.return]
         bool_return_is_error = true
+
+    [[object.function]]
+    name = "remove"
+        [object.function.return]
+        bool_return_is_error = true
+
+    [[object.function]]
+    name = "recalculate_latency"
+        [object.function.return]
+        bool_return_is_error = true
+
+    [[object.function]]
+    name = "sync_children_states"
+        [object.function.return]
+        bool_return_is_error = true
+
+[[object]]
+name = "Gst.Bus"
+status = "generate"
+    [[object.function]]
+    name = "remove_watch"
+    # Needs manual bindings and GSource support in glib-rs
+    ignore = true
+
+[[object]]
+name = "Gst.Clock"
+status = "generate"
+    [[object.function]]
+    name = "set_master"
+        [object.function.return]
+        bool_return_is_error = true
+
+    [[object.function]]
+    name = "wait_for_sync"
+        [object.function.return]
+        bool_return_is_error = true
+
+[[object]]
+name = "Gst.Element"
+status = "generate"
+    [[object.function]]
+    name = "add_pad"
+        [object.function.return]
+        bool_return_is_error = true
+
+    [[object.function]]
+    name = "remove_pad"
+        [object.function.return]
+        bool_return_is_error = true
+
+    [[object.function]]
+    name = "link"
+        [object.function.return]
+        bool_return_is_error = true
+
+    [[object.function]]
+    name = "link_pads"
+        [object.function.return]
+        bool_return_is_error = true
+
+    [[object.function]]
+    name = "seek"
+        [object.function.return]
+        bool_return_is_error = true
+
+    [[object.function]]
+    name = "seek_simple"
+        [object.function.return]
+        bool_return_is_error = true
+
+    [[object.function]]
+    name = "set_clock"
+        [object.function.return]
+        bool_return_is_error = true
+
+    [[object.function]]
+    name = "sync_state_with_parent"
+        [object.function.return]
+        bool_return_is_error = true
+
+[[object]]
+name = "Gst.Object"
+status = "generate"
+    [[object.function]]
+    name = "set_name"
+        [object.function.return]
+        bool_return_is_error = true
+
+    [[object.function]]
+    name = "set_parent"
+        [object.function.return]
+        bool_return_is_error = true
+
+    [[object.function]]
+    name = "sync_values"
+        [object.function.return]
+        bool_return_is_error = true
+
+[[object]]
+name = "Gst.Pad"
+status = "generate"
+    [[object.function]]
+    name = "link_maybe_ghosting"
+        [object.function.return]
+        bool_return_is_error = true
+
+    [[object.function]]
+    name = "unlink"
+        [object.function.return]
+        bool_return_is_error = true
+
+    [[object.function]]
+    name = "pause_task"
+        [object.function.return]
+        bool_return_is_error = true
+
+    [[object.function]]
+    name = "stop_task"
+        [object.function.return]
+        bool_return_is_error = true
+
+    [[object.function]]
+    name = "set_active"
+        [object.function.return]
+        bool_return_is_error = true
+
+[[object]]
+name = "Gst.*"
+status = "generate"
+    [[object.function]]
+    name = "update_registry"
+        [object.function.return]
+        bool_return_is_error = true
+
+    [[object.function]]
+    name = "util_dump_mem"
+    ignore = true
