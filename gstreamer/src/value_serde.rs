@@ -14,7 +14,7 @@ use num_rational::Rational32;
 use serde::de;
 use serde::de::{Deserialize, Deserializer, SeqAccess, Visitor};
 use serde::ser;
-use serde::ser::{Serialize, Serializer, SerializeTuple};
+use serde::ser::{Serialize, SerializeTuple, Serializer};
 
 use std::{fmt, mem};
 
@@ -40,10 +40,8 @@ lazy_static! {
     pub(crate) static ref FRACTION_OTHER_TYPE_ID: usize = get_other_type_id::<Fraction>();
     pub(crate) static ref FRACTION_RANGE_OTHER_TYPE_ID: usize =
         get_other_type_id::<FractionRange>();
-    pub(crate) static ref INT_RANGE_I32_OTHER_TYPE_ID: usize =
-        get_other_type_id::<IntRange<i32>>();
-    pub(crate) static ref INT_RANGE_I64_OTHER_TYPE_ID: usize =
-        get_other_type_id::<IntRange<i64>>();
+    pub(crate) static ref INT_RANGE_I32_OTHER_TYPE_ID: usize = get_other_type_id::<IntRange<i32>>();
+    pub(crate) static ref INT_RANGE_I64_OTHER_TYPE_ID: usize = get_other_type_id::<IntRange<i64>>();
     pub(crate) static ref LIST_OTHER_TYPE_ID: usize = get_other_type_id::<List>();
     pub(crate) static ref SAMPLE_OTHER_TYPE_ID: usize = get_other_type_id::<Sample>();
 }
@@ -239,7 +237,8 @@ impl<'de> Visitor<'de> for SendValueVisitor {
     }
 
     fn visit_seq<A: SeqAccess<'de>>(self, mut seq: A) -> Result<Self::Value, A::Error> {
-        let type_name = seq.next_element::<String>()?
+        let type_name = seq
+            .next_element::<String>()?
             .ok_or(de::Error::custom("Expected a value for `Value` type"))?;
         let send_value = de_send_value!(type_name, seq)?
             .ok_or(de::Error::custom("Expected a value for `Value`"))?;
@@ -249,7 +248,7 @@ impl<'de> Visitor<'de> for SendValueVisitor {
 
 impl<'de> Deserialize<'de> for SendValue {
     fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
-        deserializer.deserialize_tuple(2, SendValueVisitor{})
+        deserializer.deserialize_tuple(2, SendValueVisitor {})
     }
 }
 
@@ -276,10 +275,10 @@ mod tests {
 
     #[test]
     fn test_serialize_simple() {
+        use Bitmask;
         use Fraction;
         use FractionRange;
         use IntRange;
-        use Bitmask;
 
         ::init().unwrap();
 
@@ -300,15 +299,7 @@ mod tests {
 
         let res = ron::ser::to_string_pretty(&fraction_range, pretty_config.clone());
         assert_eq!(
-            Ok(
-                concat!(
-                    "(",
-                    "    min: (1, 3),",
-                    "    max: (1, 2),",
-                    ")"
-                )
-                    .to_owned()
-            ),
+            Ok("(    min: (1, 3),    max: (1, 2),)".to_owned()),
             res,
         );
 
@@ -319,16 +310,7 @@ mod tests {
         let int_range = IntRange::<i32>::new_with_step(0, 42, 21);
         let res = ron::ser::to_string_pretty(&int_range, pretty_config.clone());
         assert_eq!(
-            Ok(
-                concat!(
-                    "(",
-                    "    min: 0,",
-                    "    max: 42,",
-                    "    step: 21,",
-                    ")"
-                )
-                    .to_owned()
-            ),
+            Ok("(    min: 0,    max: 42,    step: 21,)".to_owned()),
             res,
         );
 
@@ -372,23 +354,19 @@ mod tests {
 
         let res = ron::ser::to_string_pretty(&array, pretty_config.clone());
         assert_eq!(
-            Ok(
-                concat!(
-                    "[",
-                    "    (\"Fraction\", (1, 3)),",
-                    "    (\"Fraction\", (1, 2)),",
-                    "    (\"String\", \"test str\"),",
-                    "]"
-                )
-                    .to_owned()
-            ),
+            Ok(concat!(
+                "[",
+                "    (\"Fraction\", (1, 3)),",
+                "    (\"Fraction\", (1, 2)),",
+                "    (\"String\", \"test str\"),",
+                "]"
+            ).to_owned()),
             res,
         );
 
         let res = serde_json::to_string(&array).unwrap();
         assert_eq!(
-            "[[\"Fraction\",[1,3]],[\"Fraction\",[1,2]],[\"String\",\"test str\"]]"
-                .to_owned(),
+            "[[\"Fraction\",[1,3]],[\"Fraction\",[1,2]],[\"String\",\"test str\"]]".to_owned(),
             res
         );
 
@@ -403,15 +381,12 @@ mod tests {
 
         let res = ron::ser::to_string_pretty(&list, pretty_config.clone());
         assert_eq!(
-            Ok(
-                concat!(
-                    "[",
-                    "    (\"Fraction\", (1, 2)),",
-                    "    (\"String\", \"test str\"),",
-                    "]"
-                )
-                    .to_owned()
-            ),
+            Ok(concat!(
+                "[",
+                "    (\"Fraction\", (1, 2)),",
+                "    (\"String\", \"test str\"),",
+                "]"
+            ).to_owned()),
             res,
         );
     }
@@ -422,10 +397,10 @@ mod tests {
         extern crate ron;
         extern crate serde_json;
 
+        use Bitmask;
         use Fraction;
         use FractionRange;
         use IntRange;
-        use Bitmask;
 
         ::init().unwrap();
 
@@ -489,8 +464,7 @@ mod tests {
         ::init().unwrap();
 
         // Array
-        let array_ron =
-            r#"[
+        let array_ron = r#"[
                 ("Fraction", (1, 3)),
                 ("Fraction", (1, 2)),
                 ("String", "test str"),
@@ -509,8 +483,7 @@ mod tests {
 
         assert_eq!("test str".to_owned(), slice[2].get::<String>().unwrap());
 
-        let array_json =
-            r#"[["Fraction",[1,3]],["Fraction",[1,2]],["String","test str"]]"#;
+        let array_json = r#"[["Fraction",[1,3]],["Fraction",[1,2]],["String","test str"]]"#;
         let array: Array = serde_json::from_str(array_json).unwrap();
         let slice = array.as_slice();
         assert_eq!(3, slice.len());
@@ -526,8 +499,7 @@ mod tests {
         assert_eq!("test str".to_owned(), slice[2].get::<String>().unwrap());
 
         // List
-        let list_ron =
-            r#"[
+        let list_ron = r#"[
                 ("Fraction", (1, 2)),
                 ("String", "test str"),
             ]"#;
