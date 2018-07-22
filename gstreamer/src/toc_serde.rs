@@ -38,7 +38,7 @@ impl Serialize for TocEntryRef {
         toc_entry.serialize_field("uid", &self.get_uid())?;
         toc_entry.serialize_field("start_stop", &self.get_start_stop_times())?;
         toc_entry.serialize_field("tags", &self.get_tags())?;
-        toc_entry.serialize_field("loop_", &self.get_loop())?;
+        toc_entry.serialize_field("loop", &self.get_loop())?;
         toc_entry.serialize_field("sub_entries", &self.get_sub_entries())?;
         toc_entry.end()
     }
@@ -87,6 +87,7 @@ struct TocEntryDe {
     uid: String,
     start_stop: Option<(i64, i64)>,
     tags: Option<TagList>,
+    #[serde(rename = "loop")]
     loop_: Option<(TocLoopType, i32)>,
     sub_entries: Vec<TocEntry>,
 }
@@ -209,14 +210,14 @@ mod tests {
                     "            uid: \"edition\",",
                     "            start_stop: Some((0, 15)),",
                     "            tags: None,",
-                    "            loop_: Some((None, 0)),",
+                    "            loop: Some((None, 0)),",
                     "            sub_entries: [",
                     "                (",
                     "                    entry_type: Chapter,",
                     "                    uid: \"chapter1\",",
                     "                    start_stop: Some((0, 10)),",
                     "                    tags: None,",
-                    "                    loop_: Some((None, 0)),",
+                    "                    loop: Some((None, 0)),",
                     "                    sub_entries: [",
                     "                        (",
                     "                            entry_type: Chapter,",
@@ -227,7 +228,7 @@ mod tests {
                     "                                    \"chapter 1.1\",",
                     "                                ]),",
                     "                            ]),",
-                    "                            loop_: Some((None, 0)),",
+                    "                            loop: Some((None, 0)),",
                     "                            sub_entries: [",
                     "                            ],",
                     "                        ),",
@@ -240,7 +241,7 @@ mod tests {
                     "                                    \"chapter 1.2\",",
                     "                                ]),",
                     "                            ]),",
-                    "                            loop_: Some((None, 0)),",
+                    "                            loop: Some((None, 0)),",
                     "                            sub_entries: [",
                     "                            ],",
                     "                        ),",
@@ -255,7 +256,7 @@ mod tests {
                     "                            \"chapter 2\",",
                     "                        ]),",
                     "                    ]),",
-                    "                    loop_: Some((None, 0)),",
+                    "                    loop: Some((None, 0)),",
                     "                    sub_entries: [",
                     "                    ],",
                     "                ),",
@@ -287,14 +288,14 @@ mod tests {
                         uid: "edition",
                         start_stop: Some((0, 15)),
                         tags: None,
-                        loop_: Some((None, 0)),
+                        loop: Some((None, 0)),
                         sub_entries: [
                             (
                                 entry_type: Chapter,
                                 uid: "chapter1",
                                 start_stop: Some((0, 10)),
                                 tags: None,
-                                loop_: Some((None, 0)),
+                                loop: Some((None, 0)),
                                 sub_entries: [
                                     (
                                         entry_type: Chapter,
@@ -303,7 +304,7 @@ mod tests {
                                         tags: Some([
                                             ("title", ["chapter 1.1"]),
                                         ]),
-                                        loop_: Some((None, 0)),
+                                        loop: Some((None, 0)),
                                         sub_entries: [
                                         ],
                                     ),
@@ -314,7 +315,7 @@ mod tests {
                                         tags: Some([
                                             ("title", ["chapter 1.2"]),
                                         ]),
-                                        loop_: Some((None, 0)),
+                                        loop: Some((None, 0)),
                                         sub_entries: [
                                         ],
                                     ),
@@ -327,7 +328,7 @@ mod tests {
                                 tags: Some([
                                     ("title", ["chapter 2"]),
                                 ]),
-                                loop_: Some((None, 0)),
+                                loop: Some((None, 0)),
                                 sub_entries: [
                                 ],
                             ),
