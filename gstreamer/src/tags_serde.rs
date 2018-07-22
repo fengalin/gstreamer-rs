@@ -17,7 +17,6 @@ use serde::ser;
 use serde::ser::{Serialize, SerializeSeq, SerializeTuple, Serializer};
 
 use std::cell::RefCell;
-use std::ffi::{CStr, CString};
 use std::fmt;
 use std::rc::Rc;
 
@@ -122,9 +121,9 @@ macro_rules! de_tag_value(
     );
 );
 
-struct TagValues<'a>(&'a CStr, &'a mut TagListRef);
+struct TagValues<'a>(&'a str, &'a mut TagListRef);
 
-struct TagValuesVisitor<'a>(&'a CStr, &'a mut TagListRef);
+struct TagValuesVisitor<'a>(&'a str, &'a mut TagListRef);
 impl<'de, 'a> Visitor<'de> for TagValuesVisitor<'a> {
     type Value = ();
 
@@ -135,9 +134,6 @@ impl<'de, 'a> Visitor<'de> for TagValuesVisitor<'a> {
     fn visit_seq<A: SeqAccess<'de>>(self, mut seq: A) -> Result<(), A::Error> {
         let tag_type: glib::Type =
             unsafe { from_glib(ffi::gst_tag_get_type(self.0.as_ptr() as *const i8)) };
-        // self.0 is deserialized as `String` before being converted to `CString`
-        // so we can safely assume we will successfully get it as `&str`
-        let tag_name = self.0.to_str().unwrap();
 
         loop {
             let tag_value = match tag_type {
@@ -153,7 +149,7 @@ impl<'de, 'a> Visitor<'de> for TagValuesVisitor<'a> {
                     } else {
                         return Err(de::Error::custom(format!(
                             "unimplemented deserialization for `Tag` {} with type `{}`",
-                            tag_name,
+                            self.0,
                             glib::Type::Other(type_id),
                         )));
                     }
@@ -161,7 +157,7 @@ impl<'de, 'a> Visitor<'de> for TagValuesVisitor<'a> {
                 type_ => {
                     return Err(de::Error::custom(format!(
                         "unimplemented deserialization for `Tag` {} with type `{}`",
-                        tag_name, type_,
+                        self.0, type_,
                     )));
                 }
             }?;
@@ -169,9 +165,9 @@ impl<'de, 'a> Visitor<'de> for TagValuesVisitor<'a> {
             match tag_value {
                 Some(tag_value) => self
                     .1
-                    .add_generic(tag_name, &tag_value, TagMergeMode::Append)
+                    .add_generic(self.0, &tag_value, TagMergeMode::Append)
                     .map_err(|_| {
-                        de::Error::custom(format!("wrong value type for `Tag` {}", tag_name,))
+                        de::Error::custom(format!("wrong value type for `Tag` {}", self.0))
                     })?,
                 None => break,
             }
@@ -201,15 +197,11 @@ impl<'de, 'a> Visitor<'de> for TagValuesTupleVisitor<'a> {
     }
 
     fn visit_seq<A: SeqAccess<'de>>(self, mut seq: A) -> Result<(), A::Error> {
-        // build a `CString` otherwise the C string starts with an `\0`
-        // every once in a while during the call to `ffi::gst_tag_get_type`
-        let name = CString::new(
-            seq.next_element::<String>()
-                .map_err(|err| de::Error::custom(format!("Error reading Tag name. {:?}", err)))?
-                .ok_or(de::Error::custom("Expected a name for the `Tag` name"))?
-                .as_str(),
-        ).unwrap();
-        seq.next_element_seed(TagValues(name.as_c_str(), self.0))?
+        let name = seq
+            .next_element::<String>()
+            .map_err(|err| de::Error::custom(format!("Error reading Tag name. {:?}", err)))?
+            .ok_or(de::Error::custom("Expected a name for the `Tag` name"))?;
+        seq.next_element_seed(TagValues(name.as_str(), self.0))?
             .ok_or(de::Error::custom("Expected a seq of values for the `Tag`"))
     }
 }
